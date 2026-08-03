@@ -89,7 +89,7 @@ function addTextMarker(session, start, end, className) {
         new Range(startPos.row, startPos.column, endPos.row, endPos.column),
         className,
         "text",
-        true
+        false
     );
     writingHighlightMarkers.push({ session, id });
 }
@@ -126,9 +126,11 @@ function selectedOffsets() {
     };
 }
 
-function highlightSelection() {
+function highlightSelection(context) {
     if (!currentInkFile) return;
-    const offsets = selectedOffsets();
+    const offsets = context && context.selectionStart !== undefined
+        ? { start: context.selectionStart, end: context.selectionEnd }
+        : selectedOffsets();
     if (offsets.start === offsets.end) return;
 
     localHighlightStore.add(
@@ -140,9 +142,11 @@ function highlightSelection() {
     refreshLocalDecorations();
 }
 
-function removeHighlight() {
+function removeHighlight(context) {
     if (!currentInkFile) return;
-    const offsets = selectedOffsets();
+    const offsets = context && context.selectionStart !== undefined
+        ? { start: context.selectionStart, end: context.selectionEnd }
+        : selectedOffsets();
     const cursor = editor.getCursorPosition();
     const cursorOffset = editor.session.getDocument().positionToIndex(cursor);
     const end = offsets.start === offsets.end ? cursorOffset + 1 : offsets.end;
@@ -192,6 +196,7 @@ function contextAtPoint(point) {
     const pos = editor.renderer.screenToTextCoordinates(point.x, point.y);
     const token = tokenAtPosition(pos);
     const selection = editor.getSelectionRange();
+    const selectionOffsets = selectedOffsets();
     const flow = currentInkFile && currentInkFile.symbols.flowAtPos(pos);
     return {
         row: pos.row,
@@ -199,6 +204,10 @@ function contextAtPoint(point) {
         tokenType: token && token.type,
         tokenValue: token && token.value,
         hasSelection: !selection.isEmpty(),
+        // Native menus can move focus and alter Ace's live selection. Keep
+        // the range that existed when the context menu was opened.
+        selectionStart: selectionOffsets.start,
+        selectionEnd: selectionOffsets.end,
         knotRow: flow && flow.Knot ? flow.Knot.row : null
     };
 }
@@ -217,10 +226,10 @@ window.addEventListener("splotch-contextmenu", event => {
 ipcRenderer.on("context-menu-action", (event, action, context) => {
     switch (action) {
         case "highlight-selection":
-            highlightSelection();
+            highlightSelection(context);
             break;
         case "remove-highlight":
-            removeHighlight();
+            removeHighlight(context);
             break;
         case "next-highlight":
             moveToHighlight(1);
