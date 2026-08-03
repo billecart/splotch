@@ -100,6 +100,7 @@ function ProjectWindow(filePath) {
         this.zoom(settings.zoom);
         this.browserWindow.webContents.send('set-animation-enabled', settings.animationEnabled);
         this.browserWindow.webContents.send('set-autocomplete-disabled', !!settings.autoCompleteDisabled);
+        this.browserWindow.webContents.send('set-performed-lines-visible', !!settings.showPerformedLines);
     });
 
     // Project settings may affect menus etc, so we refresh that
@@ -316,7 +317,7 @@ ProjectWindow.open = function(filePath) {
 }
 
 ProjectWindow.getViewSettings = function() {
-    let viewSettingDefaults = { theme:'light', zoom:'100', animationEnabled:true };
+    let viewSettingDefaults = { theme:'light', zoom:'100', animationEnabled:true, showPerformedLines:false };
 
     if(!fs.existsSync(viewSettingsPath)) {
         return viewSettingDefaults;

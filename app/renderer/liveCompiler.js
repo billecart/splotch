@@ -80,7 +80,7 @@ function updateCompilerIsBusy(isBusy) {
     }
 }
 
-function reloadInklecateSession() {
+function reloadInklecateSession(startKnot) {
 
     if( project == null || !project.ready ) {
         reloadPending = true;
@@ -99,6 +99,16 @@ function reloadInklecateSession() {
 
     var instr = buildCompileInstruction();
     instr.play = true;
+
+    // Test a knot through a temporary wrapper story. The user's source is
+    // still compiled unchanged and the wrapper exists only in the compiler's
+    // temporary directory, so production IDs and source files are untouched.
+    if (startKnot) {
+        const wrapperName = `__splotch_test_knot_${sessionIdx}.ink`;
+        instr.mainName = wrapperName;
+        instr.updatedFiles[wrapperName] =
+            `INCLUDE ${project.mainInk.filename()}\n-> ${startKnot}\n`;
+    }
 
     events.resetting(instr.sessionId);
 
@@ -165,6 +175,12 @@ function rewind() {
     choiceSequence = [];
     currentTurnIdx = -1;
     reloadInklecateSession();
+}
+
+function testKnot(knotName) {
+    choiceSequence = [];
+    currentTurnIdx = -1;
+    reloadInklecateSession(knotName);
 }
 
 function stepBack() {
@@ -412,6 +428,7 @@ exports.LiveCompiler = {
     getIssuesForFilename: (filename) => _.filter(issues, i => i.filename == filename),
     choose: choose,
     rewind: rewind,
+    testKnot: testKnot,
     stepBack: stepBack,
     getLocationInSource: getLocationInSource,
     getRuntimePathInSource: getRuntimePathInSource,

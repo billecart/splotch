@@ -30,6 +30,28 @@
     color: #AAA;
 }
 
+/* Splotch production tag categories. The selectors include the generic
+ * tag class because Ace emits dotted token names as separate CSS classes. */
+.ace_editor span.ace_tag.ace_speaker {
+    color: #c47b00;
+}
+
+.ace_editor span.ace_tag.ace_protectedId {
+    color: #b04b70;
+}
+
+.ace_editor span.ace_tag.ace_textEffect {
+    color: #3578b8;
+}
+
+.ace_editor span.ace_tag.ace_narrativeEffect {
+    color: #8b5fbf;
+}
+
+.ace_editor span.ace_tag.ace_custom {
+    color: #6e8799;
+}
+
 /* Custom instructions, e.g. >>> */
 .ace_editor span.ace_customInstruction {
     color: red;
@@ -37,4 +59,14 @@
 
 #main.hideTags .ace_editor span.ace_tag {
     color: white;
+}
+
+/* Local-only annotations. Text highlights are intentionally in front of
+ * performed-line markers so both signals remain readable. */
+.ace_editor .ace_marker-layer .splotch-performed-line {
+    background: rgba(145, 145, 145, 0.16);
+}
+
+.ace_editor .ace_marker-layer .splotch-writing-highlight {
+    background: rgba(255, 220, 55, 0.72);
 }

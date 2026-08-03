@@ -2,11 +2,18 @@ const editor = ace.edit("editor");
 const Range = ace.require("ace/range").Range;
 const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 const language_tools = ace.require("ace/ext/language_tools");
+const ipcRenderer = require("electron").ipcRenderer;
 
 const inkCompleter = require("./inkCompleter.js").inkCompleter;
+const { LocalHighlightStore, fileKey } = require("./localHighlights.js");
 
 var editorMarkers = [];
 var editorAnnotations = [];
+var performedLineMarkers = [];
+var writingHighlightMarkers = [];
+var currentInkFile = null;
+var localHighlightStore = new LocalHighlightStore();
+var showPerformedLines = false;
 
 // Used when reloading files so that cursor doesn't jump back to the top
 var savedCursorPos = null;
@@ -26,6 +33,7 @@ editor.setOptions({
     enableLiveAutocompletion: true,
 });
 editor.on("change", () => {
+    refreshLocalDecorations();
     events.change();
 });
 editor.on("changeSelection", ()=>{
@@ -52,6 +60,185 @@ editor.on("click", function(e){
         tryClickCodeLink(e);
     } else {
         setImmediate(() => events.navigate());
+    }
+});
+
+function removeMarkers(markers) {
+    markers.forEach(marker => marker.session.removeMarker(marker.id));
+    markers.length = 0;
+}
+
+function positionForOffset(session, offset) {
+    return session.getDocument().indexToPosition(offset);
+}
+
+function addLineMarker(session, row, className) {
+    const id = session.addMarker(
+        new Range(row, 0, row, session.getLine(row).length),
+        className,
+        "line",
+        false
+    );
+    performedLineMarkers.push({ session, id });
+}
+
+function addTextMarker(session, start, end, className) {
+    const startPos = positionForOffset(session, start);
+    const endPos = positionForOffset(session, end);
+    const id = session.addMarker(
+        new Range(startPos.row, startPos.column, endPos.row, endPos.column),
+        className,
+        "text",
+        true
+    );
+    writingHighlightMarkers.push({ session, id });
+}
+
+function refreshLocalDecorations() {
+    removeMarkers(performedLineMarkers);
+    removeMarkers(writingHighlightMarkers);
+
+    if (!currentInkFile || !editor.session) return;
+
+    const session = editor.session;
+    if (showPerformedLines) {
+        const performedId = /#\s*id\s*:\s*[^\s\[\]\r\n]+/i;
+        for (let row = 0; row < session.getLength(); row++) {
+            if (performedId.test(session.getLine(row))) {
+                addLineMarker(session, row, "splotch-performed-line");
+            }
+        }
+    }
+
+    const source = currentInkFile.getValue();
+    const highlights = localHighlightStore.resolve(fileKey(currentInkFile), source);
+    highlights.forEach(highlight => {
+        addTextMarker(session, highlight.start, highlight.end, "splotch-writing-highlight");
+    });
+}
+
+function selectedOffsets() {
+    const range = editor.getSelectionRange();
+    const document = editor.session.getDocument();
+    return {
+        start: document.positionToIndex(range.start),
+        end: document.positionToIndex(range.end)
+    };
+}
+
+function highlightSelection() {
+    if (!currentInkFile) return;
+    const offsets = selectedOffsets();
+    if (offsets.start === offsets.end) return;
+
+    localHighlightStore.add(
+        fileKey(currentInkFile),
+        currentInkFile.getValue(),
+        offsets.start,
+        offsets.end
+    );
+    refreshLocalDecorations();
+}
+
+function removeHighlight() {
+    if (!currentInkFile) return;
+    const offsets = selectedOffsets();
+    const cursor = editor.getCursorPosition();
+    const cursorOffset = editor.session.getDocument().positionToIndex(cursor);
+    const end = offsets.start === offsets.end ? cursorOffset + 1 : offsets.end;
+    const start = offsets.start === offsets.end ? cursorOffset : offsets.start;
+
+    localHighlightStore.remove(
+        fileKey(currentInkFile),
+        currentInkFile.getValue(),
+        start,
+        end
+    );
+    refreshLocalDecorations();
+}
+
+function moveToHighlight(direction) {
+    if (!currentInkFile) return;
+    const source = currentInkFile.getValue();
+    const highlights = localHighlightStore.resolve(fileKey(currentInkFile), source)
+        .sort((a, b) => a.start - b.start);
+    if (highlights.length === 0) return;
+
+    const cursorOffset = editor.session.getDocument().positionToIndex(editor.getCursorPosition());
+    let target;
+    if (direction > 0) {
+        target = highlights.find(highlight => highlight.start > cursorOffset) || highlights[0];
+    } else {
+        target = [...highlights].reverse().find(highlight => highlight.end < cursorOffset) || highlights[highlights.length - 1];
+    }
+
+    const start = positionForOffset(editor.session, target.start);
+    const end = positionForOffset(editor.session, target.end);
+    editor.selection.setSelectionRange(new Range(start.row, start.column, end.row, end.column));
+    editor.scrollToLine(start.row, true, true, () => {});
+    editor.focus();
+}
+
+function tokenAtPosition(pos) {
+    const candidates = [pos.column, Math.max(0, pos.column - 1), pos.column + 1];
+    for (const column of candidates) {
+        const token = editor.session.getTokenAt(pos.row, column);
+        if (token) return token;
+    }
+    return null;
+}
+
+function contextAtPoint(point) {
+    const pos = editor.renderer.screenToTextCoordinates(point.x, point.y);
+    const token = tokenAtPosition(pos);
+    const selection = editor.getSelectionRange();
+    const flow = currentInkFile && currentInkFile.symbols.flowAtPos(pos);
+    return {
+        row: pos.row,
+        column: pos.column,
+        tokenType: token && token.type,
+        tokenValue: token && token.value,
+        hasSelection: !selection.isEmpty(),
+        knotRow: flow && flow.Knot ? flow.Knot.row : null
+    };
+}
+
+window.addEventListener("splotch-contextmenu", event => {
+    if (!currentInkFile || !event.detail.target ||
+        !event.detail.target.closest || !event.detail.target.closest("#editor")) return;
+    const context = contextAtPoint(event.detail);
+    ipcRenderer.send("show-context-menu", {
+        x: event.detail.x,
+        y: event.detail.y,
+        context
+    });
+});
+
+ipcRenderer.on("context-menu-action", (event, action, context) => {
+    switch (action) {
+        case "highlight-selection":
+            highlightSelection();
+            break;
+        case "remove-highlight":
+            removeHighlight();
+            break;
+        case "next-highlight":
+            moveToHighlight(1);
+            break;
+        case "previous-highlight":
+            moveToHighlight(-1);
+            break;
+        case "go-to-knot":
+            if (context && context.tokenValue) {
+                events.goToKnot(context.tokenValue.trim(), {
+                    row: context.row,
+                    column: context.column
+                });
+            }
+            break;
+        case "test-knot":
+            if (context && context.knotRow !== null) events.testKnot(context.knotRow);
+            break;
     }
 });
 
@@ -166,7 +353,11 @@ exports.EditorView = {
     },
     showInkFile: (inkFile) => {
         clearErrors();
+        removeMarkers(performedLineMarkers);
+        removeMarkers(writingHighlightMarkers);
+        currentInkFile = inkFile;
         editor.setSession(inkFile.getAceSession());
+        refreshLocalDecorations();
         editor.focus();
     },
     focus: () => { editor.focus(); },
@@ -183,6 +374,15 @@ exports.EditorView = {
     getCurrentCursorPos: ()=>{
         return editor.getCursorPosition();
     },
+    setPerformedLinesVisible: (visible) => {
+        showPerformedLines = !!visible;
+        refreshLocalDecorations();
+    },
+    isPerformedLinesVisible: () => showPerformedLines,
+    highlightSelection: highlightSelection,
+    removeHighlight: removeHighlight,
+    nextHighlight: () => moveToHighlight(1),
+    previousHighlight: () => moveToHighlight(-1),
     setAutoCompleteDisabled: (autoCompleteDisabled) => {
         editor.setOptions({
             enableBasicAutocompletion: !autoCompleteDisabled,

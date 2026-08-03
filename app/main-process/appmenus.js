@@ -15,6 +15,7 @@ let theme = null;
 let zoom = null;
 let animationEnabled = null;
 let autoCompleteDisabled = null; // default on
+let showPerformedLines = false;
 
 
 let callbacks = {
@@ -320,6 +321,12 @@ function refresh() {
                     type: "checkbox",
                     checked: animationEnabled,
                     click: callbacks.toggleAnimation
+                },
+                {
+                    label: i18n._("Show performed lines"),
+                    type: "checkbox",
+                    checked: showPerformedLines,
+                    click: callbacks.togglePerformedLines
                 }
 
             ]
@@ -503,6 +510,7 @@ exports.AppMenus = {
     setZoom : (z) => zoom = z,
     setAnimationEnabled : (e) => animationEnabled = e,
     setAutoCompleteDisabled : (e) => autoCompleteDisabled = e,
+    setShowPerformedLines : (e) => showPerformedLines = !!e,
     setCustomSnippetMenus : (snippets) => {customInkSnippets = snippets},
     refresh : refresh
 }

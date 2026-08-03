@@ -456,6 +456,29 @@ var inkHighlightRules = function() {
             }]
         }],
         "#tags": [{
+            // Project production tags. Keep the complete tag as one token so
+            // the existing Ink grammar remains lossless, while exposing a
+            // stable category for theme-specific colours.
+            token: "tag.speaker",
+            regex: /#\s*speaker\s*:\s*[^\[\]\r\n]+/i
+        }, {
+            token: "tag.protectedId",
+            regex: /#\s*id\s*:\s*[^\[\]\r\n]+/i
+        }, {
+            token: "tag.textEffect",
+            regex: /#\s*(?:bold|dim|break)(?:\s*:\s*[^\[\]\r\n]+)?/i
+        }, {
+            token: "tag.textEffect",
+            regex: /#\s*delay\s*:\s*[^\[\]\r\n]+/i
+        }, {
+            token: "tag.narrativeEffect",
+            regex: /#\s*(?:unstable|ghost|redact)(?:\s*:\s*[^\[\]\r\n]+)?/i
+        }, {
+            // Unknown key/value tags stay readable and valid without being
+            // mistaken for one of the protected project categories.
+            token: "tag.custom",
+            regex: /#\s*[A-Za-z_][\w-]*\s*:\s*[^\[\]\r\n]+/
+        }, {
             // e.g. #tag should be highlighted
             token: "tag",
 

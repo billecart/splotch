@@ -237,6 +237,26 @@ EditorView.setEvents({
             NavHistory.addStep();
         }
     },
+    "goToKnot": (symbolName, contextPos) => {
+        var foundSymbol = InkProject.currentProject.findSymbol(symbolName, contextPos);
+        if( foundSymbol ) {
+            InkProject.currentProject.showInkFile(foundSymbol.inkFile);
+            EditorView.gotoLine(foundSymbol.row+1, foundSymbol.column);
+            NavHistory.addStep();
+        } else {
+            alert(`Knot declaration not found: ${symbolName}`);
+        }
+    },
+    "testKnot": (row) => {
+        const project = InkProject.currentProject;
+        const flows = project.activeInkFile.symbols.flowAtPos({ row, column: 0 });
+        const knot = flows && flows.Knot;
+        if (!knot) {
+            alert("Could not resolve the knot at this location.");
+            return;
+        }
+        LiveCompiler.testKnot(knot.name);
+    },
     "jumpToInclude": (includePath) => {
         InkProject.currentProject.showInkFile(includePath);
         NavHistory.addStep();
@@ -327,6 +347,10 @@ ipc.on("set-tags-visible", (event, visible) => {
         $("#main").removeClass("hideTags");
     else
         $("#main").addClass("hideTags");
+});
+
+ipc.on("set-performed-lines-visible", (event, visible) => {
+    EditorView.setPerformedLinesVisible(visible);
 });
 
 ipc.on("set-animation-enabled", (event, animationEnabled) => {

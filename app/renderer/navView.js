@@ -1,5 +1,6 @@
 const $ = window.jQuery = require('./jquery-2.2.3.min.js');
 const path = require("path");
+const ipcRenderer = require("electron").ipcRenderer;
 const _ = require("lodash");
 const i18n = require("./i18n.js");
 const InkFile = require("./inkFile.js").InkFile;
@@ -49,6 +50,22 @@ $(document).ready(() => {
         var $targetNavGroupItem = $(event.currentTarget);
         var row = $targetNavGroupItem.attr("row");
         events.jumpToRow(parseInt(row))
+    });
+
+    window.addEventListener("splotch-contextmenu", function(event) {
+        const target = event.detail.target;
+        if (!target || !target.closest) return;
+        const item = target.closest("#knot-stitch-wrapper .nav-group-item");
+        if (!item) return;
+
+        const row = parseInt(item.getAttribute("row"), 10);
+        if (!Number.isNaN(row)) {
+            ipcRenderer.send("show-context-menu", {
+                x: event.detail.x,
+                y: event.detail.y,
+                context: { knotRow: row, fromOutline: true }
+            });
+        }
     });
 
     // Add new include interactions
@@ -451,4 +468,3 @@ exports.NavView = {
     toggle: toggle,
     showAddIncludeForm: () => setIncludeFormVisible(true)
 }
-

@@ -26,7 +26,12 @@ let pendingPathToOpen = null;
 let hasFinishedLaunch = false;
 
 // main
-ipcMain.on('show-context-menu', (event) => {
+ipcMain.on('show-context-menu', (event, payload = {}) => {
+    const context = payload.context || {};
+    const sendAction = action => () => {
+        event.sender.send("context-menu-action", action, context);
+    };
+
     const template = [
         {
             label: 'Cut',
@@ -42,6 +47,46 @@ ipcMain.on('show-context-menu', (event) => {
         },
       { type: 'separator' },
     ]
+
+    if (context.tokenType === "divert.target") {
+        template.push({
+            label: "Go to knot declaration",
+            click: sendAction("go-to-knot")
+        });
+    }
+
+    if (context.knotRow !== null && context.knotRow !== undefined) {
+        template.push({
+            label: "Test this knot",
+            click: sendAction("test-knot")
+        });
+    }
+
+    if (context.hasSelection) {
+        template.push({ type: 'separator' });
+        template.push({
+            label: "Highlight selection",
+            click: sendAction("highlight-selection")
+        });
+    }
+
+    if (context.hasSelection || context.knotRow !== null || context.tokenType) {
+        template.push({
+            label: "Remove highlight",
+            click: sendAction("remove-highlight")
+        });
+    }
+
+    template.push({ type: 'separator' });
+    template.push({
+        label: "Next highlight",
+        click: sendAction("next-highlight")
+    });
+    template.push({
+        label: "Previous highlight",
+        click: sendAction("previous-highlight")
+    });
+
     const menu = Menu.buildFromTemplate(template)
     menu.popup(BrowserWindow.fromWebContents(event.sender))
 })
@@ -160,6 +205,10 @@ app.on('ready', function () {
         toggleTags: (item, focusedWindow, event) => {
             focusedWindow.webContents.send("set-tags-visible", item.checked);
         },
+        togglePerformedLines: (item, focusedWindow) => {
+            ProjectWindow.addOrChangeViewSetting('showPerformedLines', item.checked);
+            if (focusedWindow) focusedWindow.webContents.send("set-performed-lines-visible", item.checked);
+        },
         nextIssue: (item, focusedWindow) => {
             focusedWindow.webContents.send("next-issue");
         },
@@ -246,6 +295,7 @@ app.on('ready', function () {
     AppMenus.setZoom(ProjectWindow.getViewSettings().zoom);
     AppMenus.setAnimationEnabled(ProjectWindow.getViewSettings().animationEnabled);
     AppMenus.setAutoCompleteDisabled(ProjectWindow.getViewSettings().autoCompleteDisabled)
+    AppMenus.setShowPerformedLines(ProjectWindow.getViewSettings().showPerformedLines);
 
     AppMenus.refresh();
     ProjectWindow.setEvents({
@@ -263,6 +313,7 @@ app.on('ready', function () {
             AppMenus.setZoom(viewSettings.zoom);
             AppMenus.setAnimationEnabled(viewSettings.animationEnabled);
             AppMenus.setAutoCompleteDisabled(viewSettings.autoCompleteDisabled);
+            AppMenus.setShowPerformedLines(viewSettings.showPerformedLines);
             AppMenus.refresh();
         }
     });
