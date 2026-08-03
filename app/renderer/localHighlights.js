@@ -103,16 +103,29 @@ function fileKey(inkFile) {
     return inkFile.absolutePath() || `untitled:${inkFile.id}`;
 }
 
+function isEphemeralKey(key) {
+    // Unsaved documents have no source-file identity. Their numerical id is
+    // reused after an app restart, so persisting it can resurrect a highlight
+    // on unrelated text in the next untitled document.
+    return key && key.startsWith("untitled:");
+}
+
 function LocalHighlightStore(storage) {
     this.storage = storage;
+    this.ephemeralHighlights = {};
 }
 
 LocalHighlightStore.prototype.get = function(key) {
+    if (isEphemeralKey(key)) return this.ephemeralHighlights[key] || [];
     const all = readAll(this.storage);
     return Array.isArray(all[key]) ? all[key] : [];
 };
 
 LocalHighlightStore.prototype.save = function(key, highlights) {
+    if (isEphemeralKey(key)) {
+        this.ephemeralHighlights[key] = highlights;
+        return;
+    }
     const all = readAll(this.storage);
     all[key] = highlights;
     writeAll(all, this.storage);
@@ -149,6 +162,10 @@ LocalHighlightStore.prototype.resolve = function(key, source) {
 };
 
 LocalHighlightStore.prototype.clear = function(key) {
+    if (isEphemeralKey(key)) {
+        delete this.ephemeralHighlights[key];
+        return;
+    }
     const all = readAll(this.storage);
     delete all[key];
     writeAll(all, this.storage);
@@ -158,6 +175,7 @@ module.exports = {
     CONTEXT_LENGTH,
     LocalHighlightStore,
     fileKey,
+    isEphemeralKey,
     makeAnchor,
     resolveAnchor
 };

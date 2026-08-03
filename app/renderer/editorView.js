@@ -73,13 +73,8 @@ function positionForOffset(session, offset) {
 }
 
 function addLineMarker(session, row, className) {
-    const id = session.addMarker(
-        new Range(row, 0, row, Infinity),
-        className,
-        "fullLine",
-        false
-    );
-    performedLineMarkers.push({ session, id });
+    const range = session.highlightLines(row, row, className, false);
+    performedLineMarkers.push({ session, id: range.id });
 }
 
 function addTextMarker(session, start, end, className) {
@@ -148,7 +143,9 @@ function removeHighlight(context) {
         ? { start: context.selectionStart, end: context.selectionEnd }
         : selectedOffsets();
     const cursor = editor.getCursorPosition();
-    const cursorOffset = editor.session.getDocument().positionToIndex(cursor);
+    const cursorOffset = context && context.cursorOffset !== undefined
+        ? context.cursorOffset
+        : editor.session.getDocument().positionToIndex(cursor);
     const end = offsets.start === offsets.end ? cursorOffset + 1 : offsets.end;
     const start = offsets.start === offsets.end ? cursorOffset : offsets.start;
 
@@ -197,6 +194,7 @@ function contextAtPoint(point) {
     const token = tokenAtPosition(pos);
     const selection = editor.getSelectionRange();
     const selectionOffsets = selectedOffsets();
+    const cursorOffset = editor.session.getDocument().positionToIndex(pos);
     const flow = currentInkFile && currentInkFile.symbols.flowAtPos(pos);
     return {
         row: pos.row,
@@ -208,6 +206,7 @@ function contextAtPoint(point) {
         // the range that existed when the context menu was opened.
         selectionStart: selectionOffsets.start,
         selectionEnd: selectionOffsets.end,
+        cursorOffset,
         knotRow: flow && flow.Knot ? flow.Knot.row : null
     };
 }

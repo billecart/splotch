@@ -1,6 +1,7 @@
 const assert = require("assert");
 const {
     LocalHighlightStore,
+    isEphemeralKey,
     makeAnchor,
     resolveAnchor
 } = require("../renderer/localHighlights.js");
@@ -32,5 +33,15 @@ describe("local writing highlights", function() {
         assert.equal(store.get("a.ink").length, 1);
         assert.equal(store.get("b.ink").length, 0);
         assert.deepEqual(store.resolve("a.ink", source)[0].start, 4);
+    });
+
+    it("keeps unsaved-document highlights only for the current app session", function() {
+        const storage = memoryStorage();
+        const firstStore = new LocalHighlightStore(storage);
+        firstStore.add("untitled:0", "Once upon a time", 0, 4);
+
+        const restartedStore = new LocalHighlightStore(storage);
+        assert.equal(isEphemeralKey("untitled:0"), true);
+        assert.equal(restartedStore.get("untitled:0").length, 0);
     });
 });
