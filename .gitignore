@@ -1,4 +1,5 @@
 node_modules
+app/main-process/ink/inklecate_mac
 *.sublime-workspace
 Inky-darwin-x64
 Inky-darwin-arm64

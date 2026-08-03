@@ -32,6 +32,12 @@ if (process.platform == "darwin" || process.platform == "linux") {
 
 var sessions = {};
 
+function reportCompilerUnavailable(requester, sessionId, compilerPath) {
+    const message = `Ink compiler is unavailable at ${compilerPath}. Install the matching inklecate binary before starting preview.`;
+    console.error(message);
+    requester.send('play-story-unexpected-error', message, sessionId);
+}
+
 
 function compile(compileInstruction, requester) {
 
@@ -85,6 +91,11 @@ function compile(compileInstruction, requester) {
         inklecatePathToUse = path.resolve(inklecateFolderName, "inkjs-compatible", inklecateName);
     }
 
+    if( !fs.existsSync(inklecatePathToUse) ) {
+        reportCompilerUnavailable(requester, sessionId, inklecatePathToUse);
+        return;
+    }
+
     const playProcess = spawn(inklecatePathToUse, inklecateOptions, {
         "cwd": path.dirname(inklecatePathToUse),
         "env": {
@@ -101,6 +112,16 @@ function compile(compileInstruction, requester) {
         justRequestedDebugSource: false
     };
     var session = sessions[sessionId];
+
+    // spawn emits an error event for missing or non-executable binaries. A
+    // handler is required here or Electron treats ENOENT as an uncaught
+    // exception and terminates the whole editor.
+    playProcess.on('error', (error) => {
+        if( !session.ended ) {
+            session.ended = true;
+            reportCompilerUnavailable(requester, sessionId, `${inklecatePathToUse}: ${error.message}`);
+        }
+    });
 
     playProcess.stderr.setEncoding('utf8');
     playProcess.stderr.on('data', (data) => {

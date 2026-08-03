@@ -64,9 +64,15 @@
 /* Local-only annotations. Text highlights are intentionally in front of
  * performed-line markers so both signals remain readable. */
 .ace_editor .ace_marker-layer .splotch-performed-line {
-    background: rgba(145, 145, 145, 0.16);
+    background: rgba(190, 190, 190, 0.28);
 }
 
 .ace_editor .ace_marker-layer .splotch-writing-highlight {
-    background: rgba(255, 220, 55, 0.72);
+    background: rgba(255, 214, 40, 0.82);
+}
+
+.window.dark .ace_editor .ace_marker-layer .splotch-performed-line,
+.window.contrast .ace_editor .ace_marker-layer .splotch-performed-line,
+.window.focus .ace_editor .ace_marker-layer .splotch-performed-line {
+    background: rgba(205, 205, 205, 0.18);
 }

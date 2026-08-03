@@ -74,9 +74,9 @@ function positionForOffset(session, offset) {
 
 function addLineMarker(session, row, className) {
     const id = session.addMarker(
-        new Range(row, 0, row, session.getLine(row).length),
+        new Range(row, 0, row, Infinity),
         className,
-        "line",
+        "fullLine",
         false
     );
     performedLineMarkers.push({ session, id });
