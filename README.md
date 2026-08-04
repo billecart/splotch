@@ -1,4 +1,4 @@
-![](resources/Icon1024.png)
+![](resources/splotch-256.png)
 
 # splotch, the child of [Inky](https://github.com/inkle/inky)
 
