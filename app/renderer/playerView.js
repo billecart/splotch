@@ -170,10 +170,22 @@ function addTextSection(text)
         fadeIn($paragraph);
 }
 
+function getTagClass(tag) {
+    if (/^\s*speaker\s*:/i.test(tag)) return 'speaker';
+    if (/^\s*id\s*:/i.test(tag)) return 'protectedId';
+    if (/^\s*(?:bold|dim|break|delay)(\s*:|$)/i.test(tag)) return 'textEffect';
+    if (/^\s*(?:unstable|ghost|redact)(\s*:|$)/i.test(tag)) return 'narrativeEffect';
+    if (/^\s*[A-Za-z_][\w-]*\s*:/.test(tag)) return 'custom';
+    return '';
+}
+
 function addTags(tags)
 {
-    var tagsStr = tags.join(", ");
-    var $tags = $(`<p class='tags'># ${tagsStr}</p>`);
+    var $tags = $("<p class='tags'></p>");
+    tags.forEach(tag => {
+        let tagClass = getTagClass(tag);
+        $tags.append(`<span class='tag ${tagClass}'># ${tag}</span> `);
+    });
 
     $textBuffer.append($tags);
 
@@ -194,8 +206,11 @@ function addChoice(choice, callback)
     var $choice = $("<a href='#'>"+choice.choice.text+"</a>");
     var $tags = null;
     if( choice.choice.tags != null && choice.choice.tags.length > 0 ) {
-        var tagsStr = "# " + choice.choice.tags.join(" # ");
-        $tags = $(` <span class='tags'>${tagsStr}</span>`);
+        $tags = $("<span class='tags'></span>");
+        choice.choice.tags.forEach(tag => {
+            let tagClass = getTagClass(tag);
+            $tags.append(` <span class='tag ${tagClass}'># ${tag}</span>`);
+        });
     }
 
     // Append the choice

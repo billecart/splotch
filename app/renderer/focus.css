@@ -140,23 +140,28 @@
     color: #4a4a4a;
 }
 
-.window.focus .ace_editor span.ace_tag.ace_speaker {
+.window.focus .ace_editor span.ace_tag.ace_speaker,
+.window.focus #player .tag.speaker {
     color: #70614f;
 }
 
-.window.focus .ace_editor span.ace_tag.ace_protectedId {
+.window.focus .ace_editor span.ace_tag.ace_protectedId,
+.window.focus #player .tag.protectedId {
     color: #6c5661;
 }
 
-.window.focus .ace_editor span.ace_tag.ace_textEffect {
+.window.focus .ace_editor span.ace_tag.ace_textEffect,
+.window.focus #player .tag.textEffect {
     color: #4b657a;
 }
 
-.window.focus .ace_editor span.ace_tag.ace_narrativeEffect {
+.window.focus .ace_editor span.ace_tag.ace_narrativeEffect,
+.window.focus #player .tag.narrativeEffect {
     color: #665875;
 }
 
-.window.focus .ace_editor span.ace_tag.ace_custom {
+.window.focus .ace_editor span.ace_tag.ace_custom,
+.window.focus #player .tag.custom {
     color: #59666f;
 }
 

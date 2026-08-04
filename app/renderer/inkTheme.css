@@ -30,29 +30,35 @@
 }
 
 /* Tags */
-.ace_editor span.ace_tag {
+.ace_editor span.ace_tag,
+#player .tag {
     color: #AAA;
 }
 
 /* Splotch production tag categories. The selectors include the generic
  * tag class because Ace emits dotted token names as separate CSS classes. */
-.ace_editor span.ace_tag.ace_speaker {
+.ace_editor span.ace_tag.ace_speaker,
+#player .tag.speaker {
     color: #c47b00;
 }
 
-.ace_editor span.ace_tag.ace_protectedId {
+.ace_editor span.ace_tag.ace_protectedId,
+#player .tag.protectedId {
     color: #b04b70;
 }
 
-.ace_editor span.ace_tag.ace_textEffect {
+.ace_editor span.ace_tag.ace_textEffect,
+#player .tag.textEffect {
     color: #3578b8;
 }
 
-.ace_editor span.ace_tag.ace_narrativeEffect {
+.ace_editor span.ace_tag.ace_narrativeEffect,
+#player .tag.narrativeEffect {
     color: #8b5fbf;
 }
 
-.ace_editor span.ace_tag.ace_custom {
+.ace_editor span.ace_tag.ace_custom,
+#player .tag.custom {
     color: #6e8799;
 }
 

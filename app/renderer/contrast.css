@@ -148,23 +148,28 @@
     color: #888888;
 }
 
-.window.contrast .ace_editor span.ace_tag.ace_speaker {
+.window.contrast .ace_editor span.ace_tag.ace_speaker,
+.window.contrast #player .tag.speaker {
     color: #ffb854;
 }
 
-.window.contrast .ace_editor span.ace_tag.ace_protectedId {
+.window.contrast .ace_editor span.ace_tag.ace_protectedId,
+.window.contrast #player .tag.protectedId {
     color: #ff85b6;
 }
 
-.window.contrast .ace_editor span.ace_tag.ace_textEffect {
+.window.contrast .ace_editor span.ace_tag.ace_textEffect,
+.window.contrast #player .tag.textEffect {
     color: #79c0ff;
 }
 
-.window.contrast .ace_editor span.ace_tag.ace_narrativeEffect {
+.window.contrast .ace_editor span.ace_tag.ace_narrativeEffect,
+.window.contrast #player .tag.narrativeEffect {
     color: #d2a8ff;
 }
 
-.window.contrast .ace_editor span.ace_tag.ace_custom {
+.window.contrast .ace_editor span.ace_tag.ace_custom,
+.window.contrast #player .tag.custom {
     color: #a5c2d9;
 }
 
