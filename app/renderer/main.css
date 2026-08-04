@@ -43,7 +43,7 @@ div {
   top: 0;
   width: 100%;
   height: 56px;
-  background: #FBFBFB;
+  background: #f3f3f3;
   border-bottom: 1px solid #DDD;
   z-index: 50;
   cursor: default;
@@ -74,7 +74,7 @@ h1.title {
 
 .win32 #toolbar, .linux #toolbar {
   height: 34px;
-  background: white;
+  background: #f3f3f3;
 }
 
 .win32 h1.title, .linux h1.title {
@@ -512,7 +512,7 @@ img.issue-icon.warning {
   left: 0;
   right: 0;
   bottom: 0;
-  background: white;
+  background: #f3f3f3;
 }
 
 .win32 #main, .linux #main {
@@ -556,7 +556,7 @@ img.issue-icon.warning {
 }
 
 #editor .ace_gutter-layer {
-  background: white;
+  background: #f3f3f3;
   border-right: none;
 }
 
@@ -645,13 +645,13 @@ img.issue-icon.warning {
 }
 
 #player p.choice a {
-  color: #BBB;
+  color: #777;
   transition: color 0.2s;
   text-decoration: none;
 }
 
 #player p.choice a:hover {
-  color: #555;
+  color: #222;
   text-decoration: underline;
 }
 
@@ -706,7 +706,7 @@ img.issue-icon.warning {
   top: 0;
   left: 0;
   right: 0;
-  background: white;
+  background: #f3f3f3;
   z-index: 1;
 }
 
@@ -737,9 +737,13 @@ img.issue-icon.warning {
   -webkit-user-select: none;
 }
 
+#player td.expressionValue {
+  background: #f3f3f3;
+  padding-left: 10px;
+}
+
 #player td.expressionInput {
-  background: white;
-  padding: 0;
+  background: #f3f3f3;
   padding-left: 5px;
   position: relative;
 }
@@ -821,7 +825,7 @@ img.issue-icon.warning {
   top: 15%;
   left: 100px;
   right: 100px;
-  background: white;
+  background: #f3f3f3;
   border: 1px solid #DDD;
   border-radius: 10px;
   box-shadow: 0 5px 6px #EEE;

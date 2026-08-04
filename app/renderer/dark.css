@@ -86,10 +86,6 @@
     opacity: .1;
 }
 
-.window.dark .ace_editor .ace_marker-layer .ace_active-line {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
 .window.dark #player hr {
     border-top-color: #444;
 }
@@ -140,6 +136,31 @@
 }
 .window.dark .ace_editor span.ace_logic:not(.ace_innerContent) {
     color:#8eb865;
+}
+
+.window.dark .ace_editor .ace_comment,
+.window.dark .ace-tm .ace_comment {
+    color: #707070;
+}
+
+.window.dark .ace_editor span.ace_tag.ace_speaker {
+    color: #d49b43;
+}
+
+.window.dark .ace_editor span.ace_tag.ace_protectedId {
+    color: #c46b8a;
+}
+
+.window.dark .ace_editor span.ace_tag.ace_textEffect {
+    color: #5c9cd6;
+}
+
+.window.dark .ace_editor span.ace_tag.ace_narrativeEffect {
+    color: #a881d4;
+}
+
+.window.dark .ace_editor span.ace_tag.ace_custom {
+    color: #8da5b8;
 }
 
 .window.dark #main.hideTags .ace_editor span.ace_tag {

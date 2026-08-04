@@ -1,3 +1,7 @@
+/* Light theme editor background override */
+#editor.ace-tm {
+    background-color: #f3f3f3;
+}
 
 /* Flow related stuff in blue */
 .ace_editor span.ace_flow.ace_declaration,
@@ -61,18 +65,32 @@
     color: white;
 }
 
-/* Local-only annotations. Text highlights are intentionally in front of
- * performed-line markers so both signals remain readable. */
-.ace_editor .ace_marker-layer .splotch-performed-line {
+/* Selected line (active-line) gets the warmer grey */
+.ace_editor .ace_marker-layer .ace_active-line {
     background: rgba(190, 181, 166, 0.28);
+}
+
+.window.dark .ace_editor .ace_marker-layer .ace_active-line,
+.window.contrast .ace_editor .ace_marker-layer .ace_active-line,
+.window.focus .ace_editor .ace_marker-layer .ace_active-line {
+    background: rgba(211, 198, 177, 0.2);
+}
+
+/* Performed lines get the colder grey and are 50% more transparent */
+.ace_editor .ace_marker-layer .splotch-performed-line {
+    background: rgba(150, 165, 185, 0.14);
+    position: absolute;
+    z-index: 3;
 }
 
 .ace_editor .ace_marker-layer .splotch-writing-highlight {
     background: rgba(255, 214, 40, 0.82);
+    position: absolute;
+    z-index: 4;
 }
 
 .window.dark .ace_editor .ace_marker-layer .splotch-performed-line,
 .window.contrast .ace_editor .ace_marker-layer .splotch-performed-line,
 .window.focus .ace_editor .ace_marker-layer .splotch-performed-line {
-    background: rgba(211, 198, 177, 0.2);
+    background: rgba(165, 185, 210, 0.1);
 }
