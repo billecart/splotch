@@ -121,5 +121,19 @@ describe('compiles hello world game', function () {
       .getText('.issuesMessage')
       .should.eventually.not.equal('No issues.')
   })
+
+  it('highlights TODO, DEBUG, and choice speakers', function() {
+    const input = "// TODO: Fix this\n// DEBUG REDIRECTS\n* [HUMAN] Hello";
+
+    return this.app.client
+      .setValue('.ace_text-input', input)
+      .pause(2000)
+      .getHTML('.ace_todo')
+      .should.eventually.contain('TODO')
+      .getHTML('.ace_debug')
+      .should.eventually.contain('DEBUG')
+      .getHTML('.ace_speaker')
+      .should.eventually.contain('HUMAN')
+  })
 })
 

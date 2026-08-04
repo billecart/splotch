@@ -44,11 +44,19 @@ var inkHighlightRules = function() {
             include: "#statements"
         }],
         "#TODO": [{
-            regex: /^(\s*)(TODO\b)(.*)/,
+            regex: /^(\s*(?:\/\/\s*)?)(TODO\b)(.*)/,
             token: [
                 "todo",         // whitespace
                 "todo.TODO",    // TODO
                 "todo"          // user text
+            ]
+        }],
+        "#DEBUG": [{
+            regex: /^(\s*(?:\/\/\s*)?)(DEBUG\b)(.*)/,
+            token: [
+                "debug",         // whitespace
+                "debug.DEBUG",    // DEBUG
+                "debug"          // user text
             ]
         }],
         "#choice": [{
@@ -79,6 +87,9 @@ var inkHighlightRules = function() {
                 }, {
                     defaultToken: "choice.weaveInsideBrackets" 
                 }]
+            }, {
+                regex: /\b[A-Z_0-9]{2,}\b/,
+                token: "choice.speaker"
             }, {
                 include: "#choice"
             }, {
@@ -518,11 +529,13 @@ var inkHighlightRules = function() {
             regex: /<>/
         }],
         "#statements": [{
+            include: "#DEBUG"
+        }, {
+            include: "#TODO"
+        }, {
             include: "#comments"
         }, {
             include: "#escapes"
-        }, {
-            include: "#TODO"
         }, {
             include: "#globalVAR"
         }, {

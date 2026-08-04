@@ -104,7 +104,7 @@ async function createZip(sourceDir, targetZipPath) {
     targetZipPath = path.resolve(targetZipPath);
 
     if( process.platform == "darwin" || process.platform == "linux" ) {
-        await runCommand(`cd ${sourceDir} && zip -r ${targetZipPath} . -x "*.DS_Store"`);
+        await runCommand(`cd ${sourceDir} && zip -qry ${targetZipPath} . -x "*.DS_Store"`);
     }
     
     // Assume powershell is available on windows
@@ -148,7 +148,7 @@ async function buildPackageForPlatform(targetPlatform) {
     
     // Mac: Create icon from PNG
     if( targetPlatform == "mac" ) {
-        runCommand("../resources/makeIcns.command");
+        await runCommand("../resources/makeIcns.command");
     }
     
     let opts = {
@@ -168,7 +168,7 @@ async function buildPackageForPlatform(targetPlatform) {
         opts.platform = "darwin";
         opts.arch = "universal";
         opts.icon = '../resources/Icon.icns';
-        opts.ignore = ['inklecate_win.exe', 'build-package.js']
+        opts.ignore = ['inklecate_win.exe', 'build-package.js', '\\.pdb$'];
 
         // If just doing a quick local build, no need to do the
         // extremely length process of codesigning + notarising
@@ -189,16 +189,38 @@ async function buildPackageForPlatform(targetPlatform) {
             OriginalFilename: "splotch",
             InternalName: "splotch"
         }
-        opts.ignore = ['inklecate_mac', 'build-package.js']
+        opts.ignore = ['inklecate_mac', 'build-package.js', '\\.pdb$'];
     }
     else if( targetPlatform == "linux" ) {
         opts.platform = "linux";
         opts.arch = "x64";
-        opts.ignore = ['inklecate_mac', 'build-package.js']
+        opts.ignore = ['inklecate_mac', 'build-package.js', '\\.pdb$'];
     }
 
     const appPaths = await packager(opts);
     
+    // Prune unused locales
+    for (const appPath of appPaths) {
+        const pathsToPrune = targetPlatform === "mac" 
+            ? [
+                path.join(appPath, 'splotch.app', 'Contents', 'Resources'),
+                path.join(appPath, 'splotch.app', 'Contents', 'Frameworks', 'Electron Framework.framework', 'Versions', 'Current', 'Resources')
+              ]
+            : [ path.join(appPath, 'locales') ];
+            
+        for (const resDir of pathsToPrune) {
+            if (fs.existsSync(resDir)) {
+                console.log("Pruning locales in " + resDir);
+                const keepLocales = ['en.lproj', 'en-US.pak', 'en-GB.pak'];
+                fs.readdirSync(resDir).forEach(file => {
+                    if ((file.endsWith('.lproj') || (file.endsWith('.pak') && targetPlatform !== 'mac')) && !keepLocales.includes(file)) {
+                        fs.rmSync(path.join(resDir, file), { recursive: true, force: true });
+                    }
+                });
+            }
+        }
+    }
+
 
     // Only zip it up if requested, otherwise assume
     // we're doing a local build just to run locally
@@ -212,7 +234,13 @@ async function buildPackageForPlatform(targetPlatform) {
 
         // Create .dmg on mac
         if( targetPlatform == "mac" ) {
-            await makeDMG();
+            try {
+                await makeDMG();
+            } catch (e) {
+                console.warn("DMG creation failed, skipping.");
+            }
+            let macZipPath = path.normalize("../ReleaseUpload/splotch_mac.zip");
+            await createZip(outputAppDirPath, macZipPath);
         }
 
         // Create .zip on other platforms

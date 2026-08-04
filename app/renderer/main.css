@@ -552,7 +552,17 @@ img.issue-icon.warning {
 #editor .ace-todo,      /* issue from compiler */
 #editor span.ace_todo   /* syntax highlighter */
 {
-  background: #bffff1;
+  background: #ccff00 !important;
+  color: #000 !important;
+}
+
+#editor span.ace_debug {
+  background: #FFC5D3 !important;
+  color: #000 !important;
+}
+
+#editor span.ace_choice.ace_speaker {
+  color: #4B3B8B !important;
 }
 
 #editor .ace_gutter-layer {
