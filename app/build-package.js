@@ -2,8 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const packager = require('@electron/packager');
-const appdmg = process.platform == "darwin" ? require('appdmg') : null;
-
+let appdmg = null;
+if (process.platform == "darwin") {
+    try {
+        appdmg = require('appdmg');
+    } catch (e) {
+        console.warn("Warning: appdmg could not be loaded, dmg creation is disabled.");
+    }
+}
 const allPlatforms = ["mac", "win32", "win64", "linux"];
 
 const args = process.argv.slice(2);
@@ -62,12 +68,16 @@ function deleteAtPath(relativePath) {
     }
 }
 
-// Make DMG on Mac
 async function makeDMG() {
     return new Promise((resolve, reject) => {
+        if (!appdmg) {
+            console.log("Skipping DMG creation because appdmg module is not available.");
+            return resolve();
+        }
+        
         const ee = appdmg({ 
             source: path.normalize("../resources/appdmg.json"), 
-            target: path.normalize("../ReleaseUpload/Inky.dmg")
+            target: path.normalize("../ReleaseUpload/Splotch.dmg")
         });
         
         ee.on('progress', function (info) {
@@ -77,12 +87,12 @@ async function makeDMG() {
         });
         
         ee.on('finish', function () {
-            console.log("Successfully created Inky.dmg");
+            console.log("Successfully created Splotch.dmg");
             resolve();
         });
         
         ee.on('error', function (err) {
-            console.error("Error when creating Inky.dmg:", err);
+            console.error("Error when creating Splotch.dmg:", err);
             reject(err);
         });
     });
@@ -114,20 +124,20 @@ async function buildPackageForPlatform(targetPlatform) {
     let outputAppDirPath;
     let finalZipOrDmgPath;
     if( targetPlatform == "mac" ) {
-        outputAppDirPath = "../Inky-darwin-universal";
-        finalZipOrDmgPath = "../ReleaseUpload/Inky_mac.dmg";
+        outputAppDirPath = "../Splotch-darwin-universal";
+        finalZipOrDmgPath = "../ReleaseUpload/Splotch_mac.dmg";
     }
     else if( targetPlatform == "win32" ) {
-        outputAppDirPath = "../Inky-win32-ia32";
-        finalZipOrDmgPath = "../ReleaseUpload/Inky_windows_32.zip";
+        outputAppDirPath = "../Splotch-win32-ia32";
+        finalZipOrDmgPath = "../ReleaseUpload/Splotch_windows_32.zip";
     }
     else if( targetPlatform == "win64" ) {
-        outputAppDirPath = "../Inky-win32-x64";
-        finalZipOrDmgPath = "../ReleaseUpload/Inky_windows_64.zip";
+        outputAppDirPath = "../Splotch-win32-x64";
+        finalZipOrDmgPath = "../ReleaseUpload/Splotch_windows_64.zip";
     }
     else if( targetPlatform == "linux" ) {
-        outputAppDirPath = "../Inky-linux-x64";
-        finalZipOrDmgPath = "../ReleaseUpload/Inky_linux.zip";
+        outputAppDirPath = "../Splotch-linux-x64";
+        finalZipOrDmgPath = "../ReleaseUpload/Splotch_linux.zip";
     } else {
         throw "Unexpected platform: "+targetPlatform;
     }
@@ -144,10 +154,10 @@ async function buildPackageForPlatform(targetPlatform) {
     let opts = {
         dir: '.', // Source directory (app directory)
         out: "..",
-        name: 'Inky', 
+        name: 'Splotch', 
         overwrite: true,
         extendInfo: '../resources/info.plist',
-        appBundleId: 'com.inkle.inky',
+        appBundleId: 'com.inkle.splotch',
         prune: true,
         asar: {
             unpackDir: 'main-process/ink'
@@ -175,9 +185,9 @@ async function buildPackageForPlatform(targetPlatform) {
         opts.icon = '../resources/Icon1024.png.ico';
         opts.win32metadata = {
             CompanyName: "inkle Ltd",
-            FileDescription: "Inky",
-            OriginalFilename: "Inky",
-            InternalName: "Inky"
+            FileDescription: "Splotch",
+            OriginalFilename: "Splotch",
+            InternalName: "Splotch"
         }
         opts.ignore = ['inklecate_mac', 'build-package.js']
     }

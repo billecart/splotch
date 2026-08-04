@@ -1,6 +1,6 @@
 {
-  "name": "inky",
-  "productName": "Inky",
+  "name": "splotch",
+  "productName": "Splotch",
   "version": "0.15.2",
   "description": "An editor for ink",
   "main": "main-process/main.js",
@@ -45,5 +45,11 @@
   },
   "optionalDependencies": {
     "appdmg": "^0.6.6"
+  },
+  "allowScripts": {
+    "electron@30.0.4": true,
+    "fs-xattr@0.3.1": true,
+    "fsevents@2.3.3": true,
+    "macos-alias@0.2.11": true
   }
 }

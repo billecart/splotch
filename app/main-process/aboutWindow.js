@@ -36,14 +36,14 @@ var aboutWindow = null;
 
 
 function AboutWindow(theme) {
-    electronWindowOptions.title = i18n._("About Inky");
+    electronWindowOptions.title = i18n._("About Splotch");
 
     var w = new BrowserWindow(electronWindowOptions);
     w.loadURL("file://" + __dirname + "/../renderer/about/about.html");
 
     w.webContents.on("did-finish-load", () => {
         w.webContents.send("set-about-data", {
-            "inkyVersion": electron.app.getVersion(),
+            "splotchVersion": electron.app.getVersion(),
             "inkVersion": inkVersion,
             "inkjsVersion": inkjsPackage.version
         });

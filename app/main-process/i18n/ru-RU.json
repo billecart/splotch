@@ -1,5 +1,5 @@
 {
-    "About Inky": "О программе Inky",
+    "About Inky": "О программе Splotch",
     "File": "Файл",
     "New Project": "Новый проект",
     "New Included Ink File": "Новый включаемый файл Ink",
@@ -72,7 +72,7 @@
     "Show All": "Показать все",
     "Quit": "Выход",
     "Bring All to Front": "Переместить все на передний план",
-    "Inky": "Inky",
+    "Inky": "Splotch",
     "Open main ink file": "Открыть основной ink-файл",
     "Ink files": "Ink файлы",
     "Sorry, the ink compiler crashed ☹": "К сожалению, компилятор ink прекратил работу ☹",
