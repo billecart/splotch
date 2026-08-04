@@ -308,10 +308,15 @@ InkProject.prototype.showInkFile = function(inkFile) {
     }
 }
 
-InkProject.prototype.save = function() {
+InkProject.prototype.save = function(arg1, arg2) {
+
+    var callback = (typeof arg1 === 'function') ? arg1 : ((typeof arg2 === 'function') ? arg2 : null);
 
     // Make saving atomic, don't save again if we're already saving
-    if( this.saveActive ) return;
+    if( this.saveActive ) {
+        if (callback) callback(false);
+        return;
+    }
     this.saveActive = true;
 
     var wasUnsaved = !this.mainInk.projectDir;
@@ -333,6 +338,8 @@ InkProject.prototype.save = function() {
                 InkProject.events.didSave();
 
             this.saveActive = false;
+            
+            if (callback) callback(allSuccess);
         }
     }
 
@@ -353,6 +360,7 @@ InkProject.prototype.save = function() {
         // Cancel the save process because main ink file save failed
         else {
             this.saveActive = false;
+            if (callback) callback(false);
         }
     });
 }
@@ -552,8 +560,12 @@ InkProject.prototype.tryClose = function() {
         ipcRenderer.invoke("try-close").then((responseObject) => {
             var response = responseObject.response;
             if( response == 0 ) {
-                this.save(false, () => {
-                    this.closeImmediate();
+                this.save(false, (success) => {
+                    if (success !== false) {
+                        this.closeImmediate();
+                    } else {
+                        ipcRenderer.send("project-cancelled-close");
+                    }
                 });
             }
             

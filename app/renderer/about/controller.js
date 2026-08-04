@@ -4,7 +4,7 @@ const $ = window.jQuery = require('../jquery-2.2.3.min.js');
 
 
 ipc.on("set-about-data", (event, data) => {
-    $("#version-splotch").text("Splotch version: "+data.splotchVersion);
+    $("#version-splotch").text("splotch version: "+data.splotchVersion);
     $("#version-ink").text("ink version: "+data.inkVersion);
     $("#version-inkjs").text("inkjs version: "+data.inkjsVersion);
 });

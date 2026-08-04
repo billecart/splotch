@@ -77,7 +77,7 @@ async function makeDMG() {
         
         const ee = appdmg({ 
             source: path.normalize("../resources/appdmg.json"), 
-            target: path.normalize("../ReleaseUpload/Splotch.dmg")
+            target: path.normalize("../ReleaseUpload/splotch.dmg")
         });
         
         ee.on('progress', function (info) {
@@ -87,12 +87,12 @@ async function makeDMG() {
         });
         
         ee.on('finish', function () {
-            console.log("Successfully created Splotch.dmg");
+            console.log("Successfully created splotch.dmg");
             resolve();
         });
         
         ee.on('error', function (err) {
-            console.error("Error when creating Splotch.dmg:", err);
+            console.error("Error when creating splotch.dmg:", err);
             reject(err);
         });
     });
@@ -124,20 +124,20 @@ async function buildPackageForPlatform(targetPlatform) {
     let outputAppDirPath;
     let finalZipOrDmgPath;
     if( targetPlatform == "mac" ) {
-        outputAppDirPath = "../Splotch-darwin-universal";
-        finalZipOrDmgPath = "../ReleaseUpload/Splotch_mac.dmg";
+        outputAppDirPath = "../splotch-darwin-universal";
+        finalZipOrDmgPath = "../ReleaseUpload/splotch_mac.dmg";
     }
     else if( targetPlatform == "win32" ) {
-        outputAppDirPath = "../Splotch-win32-ia32";
-        finalZipOrDmgPath = "../ReleaseUpload/Splotch_windows_32.zip";
+        outputAppDirPath = "../splotch-win32-ia32";
+        finalZipOrDmgPath = "../ReleaseUpload/splotch_windows_32.zip";
     }
     else if( targetPlatform == "win64" ) {
-        outputAppDirPath = "../Splotch-win32-x64";
-        finalZipOrDmgPath = "../ReleaseUpload/Splotch_windows_64.zip";
+        outputAppDirPath = "../splotch-win32-x64";
+        finalZipOrDmgPath = "../ReleaseUpload/splotch_windows_64.zip";
     }
     else if( targetPlatform == "linux" ) {
-        outputAppDirPath = "../Splotch-linux-x64";
-        finalZipOrDmgPath = "../ReleaseUpload/Splotch_linux.zip";
+        outputAppDirPath = "../splotch-linux-x64";
+        finalZipOrDmgPath = "../ReleaseUpload/splotch_linux.zip";
     } else {
         throw "Unexpected platform: "+targetPlatform;
     }
@@ -154,7 +154,7 @@ async function buildPackageForPlatform(targetPlatform) {
     let opts = {
         dir: '.', // Source directory (app directory)
         out: "..",
-        name: 'Splotch', 
+        name: 'splotch', 
         overwrite: true,
         extendInfo: '../resources/info.plist',
         appBundleId: 'com.inkle.splotch',
@@ -185,9 +185,9 @@ async function buildPackageForPlatform(targetPlatform) {
         opts.icon = '../resources/Icon1024.png.ico';
         opts.win32metadata = {
             CompanyName: "inkle Ltd",
-            FileDescription: "Splotch",
-            OriginalFilename: "Splotch",
-            InternalName: "Splotch"
+            FileDescription: "splotch",
+            OriginalFilename: "splotch",
+            InternalName: "splotch"
         }
         opts.ignore = ['inklecate_mac', 'build-package.js']
     }

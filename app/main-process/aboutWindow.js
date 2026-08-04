@@ -36,7 +36,7 @@ var aboutWindow = null;
 
 
 function AboutWindow(theme) {
-    electronWindowOptions.title = i18n._("About Splotch");
+    electronWindowOptions.title = i18n._("About splotch");
 
     var w = new BrowserWindow(electronWindowOptions);
     w.loadURL("file://" + __dirname + "/../renderer/about/about.html");

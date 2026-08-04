@@ -35,7 +35,7 @@
     color: #AAA;
 }
 
-/* Splotch production tag categories. The selectors include the generic
+/* splotch production tag categories. The selectors include the generic
  * tag class because Ace emits dotted token names as separate CSS classes. */
 .ace_editor span.ace_tag.ace_speaker,
 #player .tag.speaker {
