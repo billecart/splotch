@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512">
+  <title>Splotch</title>
+  <defs>
+    <filter id="wet" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015 0.022" numOctaves="3" seed="7" result="n"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+    <mask id="eyes" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect x="0" y="0" width="512" height="512" fill="#FFFFFF"></rect>
+      <ellipse cx="205" cy="232" rx="30" ry="36" fill="#000000"></ellipse>
+      <ellipse cx="311" cy="240" rx="26" ry="31" fill="#000000"></ellipse>
+    </mask>
+  </defs>
+  <g mask="url(#eyes)" filter="url(#wet)" fill="#0D0D0F">
+    <path d="M439.6 256.0 C444.0 274.6 444.4 296.2 441.5 316.3 C438.5 336.3 433.0 359.4 421.7 376.4 C410.5 393.5 392.2 409.3 374.1 418.6 C356.1 427.9 333.0 429.1 313.3 432.3 C293.6 435.6 275.3 437.5 256.0 438.0 C236.7 438.6 214.3 443.2 197.5 435.9 C180.8 428.6 166.1 409.6 155.4 394.5 C144.7 379.4 141.6 360.2 133.1 345.3 C124.6 330.4 114.4 320.1 104.6 305.2 C94.7 290.3 82.2 275.1 74.0 256.0 C65.7 236.9 53.2 211.4 55.0 190.7 C56.9 170.0 72.0 149.0 85.1 131.8 C98.3 114.7 114.5 95.2 133.9 87.9 C153.3 80.6 181.0 90.5 201.4 88.0 C221.8 85.4 238.0 72.2 256.0 72.8 C274.0 73.5 292.8 84.1 309.4 91.7 C326.0 99.4 342.6 107.4 355.7 118.8 C368.8 130.2 378.3 145.8 388.1 160.0 C397.9 174.3 406.0 188.5 414.6 204.5 C423.1 220.5 435.1 237.4 439.6 256.0Z"></path>
+    <circle cx="404" cy="452" r="13"></circle>
+    <circle cx="88" cy="392" r="8"></circle>
+  </g>
+</svg>
