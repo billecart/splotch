@@ -8,9 +8,17 @@ Inky-win32-x64
 Inky-win32-ia32
 Inky-linux-x64
 Inky_windows.zip
+splotch-darwin-x64
+splotch-darwin-arm64
+splotch-darwin-universal
+splotch-win32-x64
+splotch-win32-ia32
+splotch-linux-x64
 ReleaseUpload
 app/renderer/documentation/
 .idea/
 *.AppImage
 AppImage
 .DS_Store
+Splotch app icon concepts.zip
+exports/

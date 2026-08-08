@@ -184,7 +184,7 @@ async function buildPackageForPlatform(targetPlatform) {
         opts.arch = targetPlatform == "win32" ? "ia32" : "x64";
         opts.icon = '../resources/Icon1024.png.ico';
         opts.win32metadata = {
-            CompanyName: "inkle Ltd",
+            CompanyName: "billecart",
             FileDescription: "splotch",
             OriginalFilename: "splotch",
             InternalName: "splotch"

@@ -25,9 +25,9 @@ catch(e) {
 
 var tempInkPath;
 if (process.platform == "darwin" || process.platform == "linux") {
-    tempInkPath = process.env.TMPDIR ? path.join(process.env.TMPDIR, "inky_compile") : "/tmp/inky_compile";
+    tempInkPath = process.env.TMPDIR ? path.join(process.env.TMPDIR, "splotch_compile") : "/tmp/splotch_compile";
 } else {
-    tempInkPath = path.join(process.env.temp, "inky_compile")
+    tempInkPath = path.join(process.env.temp, "splotch_compile")
 }
 
 var sessions = {};

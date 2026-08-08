@@ -51,7 +51,7 @@ function ProjectWindow(filePath) {
         e => e.checked
     ).label.toLowerCase();
 
-    electronWindowOptions.title = i18n._("Inky");
+    electronWindowOptions.title = i18n._("splotch");
     this.browserWindow = new BrowserWindow(electronWindowOptions);
     this.browserWindow.loadURL("file://" + __dirname + "/../renderer/index.html");
     this.browserWindow.setSheetOffset(49);
@@ -309,7 +309,6 @@ ProjectWindow.open = function(filePath) {
 
     // TODO: Could check whether the filepath is relative to any of our
     // existing open projects, and switch to that window?
-    console.log("Testing!")
     if( filePath) {
         addRecentFile(filePath);
         return new ProjectWindow(filePath);

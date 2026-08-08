@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain, dialog, ipcRenderer, Menu} = require('electron')
+const {app, BrowserWindow, ipcMain, dialog, Menu} = require('electron')
 const i18n = require("./i18n/i18n.js")
 const {ProjectWindow} = require("./projectWindow.js");
 const {DocumentationWindow} = require("./documentationWindow.js");
@@ -6,8 +6,6 @@ const {AboutWindow} = require("./aboutWindow.js");
 const {AppMenus} = require('./appmenus.js');
 const {onForceQuit} = require('./forceQuitDetect');
 const {Inklecate} = require("./inklecate.js");
-const { fstat } = require('original-fs');
-const {fs} = require("fs");
 
 
 function inkJSNeedsUpdating() {
@@ -176,7 +174,6 @@ app.on('ready', function () {
             if (win) win.newInclude();
         },
         open: () => {
-            console.log("Test!")
             ProjectWindow.open();
         },
         clearRecent: () => {
@@ -289,7 +286,6 @@ app.on('ready', function () {
         }
     });
     
-    console.log("Testing!")
     AppMenus.setRecentFiles(ProjectWindow.getRecentFiles());
     AppMenus.setTheme(ProjectWindow.getViewSettings().theme);
     AppMenus.setZoom(ProjectWindow.getViewSettings().zoom);
@@ -329,7 +325,7 @@ app.on('ready', function () {
         }
     }
 
-    // Opened Inky with specific file (e.g. drag and drop or windows command line)
+    // Opened splotch with specific file (e.g. drag and drop or windows command line)
     if( pendingPathToOpen ) {
         ProjectWindow.open(pendingPathToOpen);
         pendingPathToOpen = null;

@@ -30,7 +30,7 @@ jobs:
           VERSION: 0.16.0
 
           # By default, the author will be your name on GitHub. You can manually change this.
-          AUTHOR: "inkle ltd."
+          AUTHOR: "billecart"
 
         run: |
           echo "APP_NAME=${APP_NAME}" >> $GITHUB_ENV
@@ -71,7 +71,7 @@ jobs:
       - name: Build electron app (Win)
         if: matrix.os == 'windows-latest'
         run: |
-          npx --yes @electron/packager app Splotch --platform=win32  --arch=x64 --icon=./resources/Icon1024.png.ico --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_mac" --win32metadata.ProductName="Splotch" --win32metadata.CompanyName="inkle Ltd" --win32metadata.FileDescription="Splotch" --win32metadata.OriginalFilename="Splotch" --win32metadata.InternalName="Splotch"
+          npx --yes @electron/packager app Splotch --platform=win32  --arch=x64 --icon=./resources/Icon1024.png.ico --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_mac" --win32metadata.ProductName="Splotch" --win32metadata.CompanyName="billecart" --win32metadata.FileDescription="Splotch" --win32metadata.OriginalFilename="Splotch" --win32metadata.InternalName="Splotch"
           mkdir -p ReleaseUpload
           7z a -tzip Splotch-win32-x64.zip Splotch-win32-x64 
           mv Splotch-win32-x64.zip ReleaseUpload/Splotch-win32-x64.zip

@@ -4,6 +4,8 @@ const TokenIterator = ace.require("ace/token_iterator").TokenIterator;
 const language_tools = ace.require("ace/ext/language_tools");
 const ipcRenderer = require("electron").ipcRenderer;
 
+const debounce = require("lodash/debounce");
+
 const inkCompleter = require("./inkCompleter.js").inkCompleter;
 const { LocalHighlightStore, fileKey } = require("./localHighlights.js");
 
@@ -32,8 +34,14 @@ editor.setOptions({
     enableBasicAutocompletion: true, // defaults only, will be overriden by setAutoCompleteDisabled
     enableLiveAutocompletion: true,
 });
+// refreshLocalDecorations rescans the whole document (every line when
+// performed-lines is on, plus an indexOf per highlight). Running it on every
+// keystroke is O(lines + highlights x length) per keypress, so on the change
+// path it's debounced. Direct callers (file switch, toggles, highlight edits)
+// still refresh immediately.
+const refreshLocalDecorationsDebounced = debounce(() => refreshLocalDecorations(), 150);
 editor.on("change", () => {
-    refreshLocalDecorations();
+    refreshLocalDecorationsDebounced();
     events.change();
 });
 editor.on("changeSelection", ()=>{
@@ -361,6 +369,9 @@ exports.EditorView = {
     },
     showInkFile: (inkFile) => {
         clearErrors();
+        // Drop any pending change-debounced refresh so it can't run against
+        // the file we're switching away from.
+        refreshLocalDecorationsDebounced.cancel();
         removeMarkers(performedLineMarkers);
         removeMarkers(writingHighlightMarkers);
         currentInkFile = inkFile;

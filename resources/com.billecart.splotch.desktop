@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Categories=Development;IDE;
+Name=splotch
+Comment=splotch
+Exec=/opt/splotch/splotch
+Path=/opt/splotch/
+Icon=splotch
