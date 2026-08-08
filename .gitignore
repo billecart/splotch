@@ -22,3 +22,5 @@ AppImage
 .DS_Store
 Splotch app icon concepts.zip
 exports/
+resources/Icon.icns
+resources/Icon.iconset/
