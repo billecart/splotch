@@ -467,28 +467,35 @@ var inkHighlightRules = function() {
             }]
         }],
         "#tags": [{
-            // Project production tags. Keep the complete tag as one token so
-            // the existing Ink grammar remains lossless, while exposing a
-            // stable category for theme-specific colours.
+            // Project production tags. Each tag is tokenised on its own so
+            // multiple tags on one line (# a # b # c) get individual colours,
+            // matching how the preview panel categorises them. The value stops
+            // at the next "#" (a tag boundary) rather than running to EOL.
+            //
+            // NB: do NOT add a flag (e.g. /i) to these regexes. This Ace build
+            // corrupts the source of any flagged regex literal when it merges a
+            // state's rules (it appends a stray "\/"), so a flagged rule never
+            // matches and every tag silently falls through to tag.custom. Keys
+            // are matched lower-case, which is the production tag convention.
             token: "tag.speaker",
-            regex: /#\s*speaker\s*:\s*[^\[\]\r\n]+/i
+            regex: /#\s*speaker\s*:\s*[^\[\]\r\n#]+/
         }, {
             token: "tag.protectedId",
-            regex: /#\s*id\s*:\s*[^\[\]\r\n]+/i
+            regex: /#\s*id\s*:\s*[^\[\]\r\n#]+/
         }, {
             token: "tag.textEffect",
-            regex: /#\s*(?:bold|dim|break)(?:\s*:\s*[^\[\]\r\n]+)?/i
+            regex: /#\s*(?:bold|dim|break)(?:\s*:\s*[^\[\]\r\n#]+)?/
         }, {
             token: "tag.textEffect",
-            regex: /#\s*delay\s*:\s*[^\[\]\r\n]+/i
+            regex: /#\s*delay\s*:\s*[^\[\]\r\n#]+/
         }, {
             token: "tag.narrativeEffect",
-            regex: /#\s*(?:unstable|ghost|redact)(?:\s*:\s*[^\[\]\r\n]+)?/i
+            regex: /#\s*(?:unstable|ghost|redact)(?:\s*:\s*[^\[\]\r\n#]+)?/
         }, {
             // Unknown key/value tags stay readable and valid without being
             // mistaken for one of the protected project categories.
             token: "tag.custom",
-            regex: /#\s*[A-Za-z_][\w-]*\s*:\s*[^\[\]\r\n]+/
+            regex: /#\s*[A-Za-z_][\w-]*\s*:\s*[^\[\]\r\n#]+/
         }, {
             // e.g. #tag should be highlighted
             token: "tag",
@@ -508,8 +515,9 @@ var inkHighlightRules = function() {
             //
             // Right now we simply assume that tags are always at the
             // of a line unless they're in a choice, in which case we
-            // stop parsing the tag at "[" or "]".
-            regex: /#[^\[\]$]+/
+            // stop parsing the tag at "[" or "]". We also stop at the next
+            // "#" so each tag on a multi-tag line is coloured separately.
+            regex: /#[^\[\]$#]+/
         }],
         "#inlineContent": [{ 
             include: "#inlineConditional"
