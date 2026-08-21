@@ -78,9 +78,9 @@ var inkHighlightRules = function() {
             }, {
                 token: "choice.weaveBracket", 
                 regex: /\s*\[\s*/,                  // [ weave start 
-                push: [{ 
-                    token: "choice.weaveBracket", 
-                    regex: /\s*\]\s*/,              // ] weave end 
+                push: [{
+                    token: "choice.weaveBracket",
+                    regex: /\s*\]\s*/,              // ] weave end
                     next: "start"
                 }, {
                     include: "#inlineContent" 
@@ -478,46 +478,44 @@ var inkHighlightRules = function() {
             // matches and every tag silently falls through to tag.custom. Keys
             // are matched lower-case, which is the production tag convention.
             token: "tag.speaker",
-            regex: /#\s*speaker\s*:\s*[^\[\]\r\n#]+/
+            regex: /#\s*speaker\s*:\s*[^\[\]{}\r\n#]+/
         }, {
             token: "tag.protectedId",
-            regex: /#\s*id\s*:\s*[^\[\]\r\n#]+/
+            regex: /#\s*id\s*:\s*[^\[\]{}\r\n#]+/
         }, {
             token: "tag.textEffect",
-            regex: /#\s*(?:bold|dim|break)(?:\s*:\s*[^\[\]\r\n#]+)?/
+            regex: /#\s*(?:bold|dim|break)(?:\s*:\s*[^\[\]{}\r\n#]+)?/
         }, {
             token: "tag.textEffect",
-            regex: /#\s*delay\s*:\s*[^\[\]\r\n#]+/
+            regex: /#\s*delay\s*:\s*[^\[\]{}\r\n#]+/
         }, {
             token: "tag.narrativeEffect",
-            regex: /#\s*(?:unstable|ghost|redact)(?:\s*:\s*[^\[\]\r\n#]+)?/
+            regex: /#\s*(?:unstable|ghost|redact)(?:\s*:\s*[^\[\]{}\r\n#]+)?/
         }, {
             // Unknown key/value tags stay readable and valid without being
             // mistaken for one of the protected project categories.
             token: "tag.custom",
-            regex: /#\s*[A-Za-z_][\w-]*\s*:\s*[^\[\]\r\n#]+/
+            regex: /#\s*[A-Za-z_][\w-]*\s*:\s*[^\[\]{}\r\n#]+/
         }, {
             // e.g. #tag should be highlighted
             token: "tag",
 
-            // End of tag condition: Note that it's very hard to get
-            // this exactly right because because you can do both:
+            // End of tag condition. There are two competing shapes:
             //
-            //   1. # {blue|red|green} {one|two}      
-            //   2. {red #red|blue #blue|green #green} 
+            //   1. # {blue|red|green} {one|two}       (tag value IS inline logic)
+            //   2. {red #red|blue #blue|green #green}  (tags INSIDE inline logic)
             //
-            // So we can't have "{" or "}" signify the end of a tag
-            // since that would break the most common case (1), but
-            // the compromise is that it breaks the less usual case (2).
-            // (Maybe there's a way to handle this with Ace's push/pop
-            //  state/stack based system? I never fully understood how
-            //  it works!)
-            //
-            // Right now we simply assume that tags are always at the
-            // of a line unless they're in a choice, in which case we
-            // stop parsing the tag at "[" or "]". We also stop at the next
-            // "#" so each tag on a multi-tag line is coloured separately.
-            regex: /#[^\[\]$#]+/
+            // We stop the tag at "{" and "}" so a tag that lives inside an
+            // inline conditional/sequence (case 2) cannot swallow that
+            // construct's closing "}". Without this, the enclosing "{...}"
+            // never closes and the tokenizer leaks its logic state onto every
+            // following line (comments and knot/stitch headers then render as
+            // plain text). Case 2 is the norm in this project (per-line VO ids
+            // inside {condition:...} lines); case 1 does not occur here and is
+            // the accepted trade-off. We also stop at "[", "]" (choice weave
+            // brackets) and at the next "#" so each tag on a multi-tag line is
+            // coloured separately.
+            regex: /#[^\[\]${}#]+/
         }],
         "#inlineContent": [{ 
             include: "#inlineConditional"
