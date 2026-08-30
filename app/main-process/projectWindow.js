@@ -57,6 +57,10 @@ function ProjectWindow(filePath) {
     this.browserWindow.setSheetOffset(49);
 
     this.safeToClose = false;
+
+    // Normalised, so that two spellings of the same path (symlinks, "./",
+    // trailing slashes) resolve to the same window rather than opening twice.
+    if( filePath ) filePath = path.resolve(filePath);
     this.mainInkAbsPath = filePath;
 
     // Existing project at specific path
@@ -252,8 +256,9 @@ ProjectWindow.withWebContents = function(webContents) {
 ProjectWindow.withMainkInkPath = function(absPath) {
     if( !absPath ) return null;
 
+    const resolvedPath = path.resolve(absPath);
     for(var i=0; i<windows.length; i++) {
-        if( windows[i].mainInkAbsPath == absPath )
+        if( windows[i].mainInkAbsPath == resolvedPath )
             return windows[i];
     }
     return null;
@@ -307,9 +312,20 @@ ProjectWindow.open = function(filePath) {
             filePath = multiSelectPaths[0];
     }
 
-    // TODO: Could check whether the filepath is relative to any of our
-    // existing open projects, and switch to that window?
     if( filePath) {
+
+        // Already open? Focus that window instead of opening a duplicate.
+        // Covers drag/drop, Finder double-click, File > Open and Open Recent.
+        let existingWin = ProjectWindow.withMainkInkPath(filePath);
+        if( existingWin ) {
+            existingWin.browserWindow.focus();
+            existingWin.browserWindow.webContents.send('open-main-ink');
+            return existingWin;
+        }
+
+        // TODO: Could check whether the filepath is relative to any of our
+        // existing open projects, and switch to that window?
+
         addRecentFile(filePath);
         return new ProjectWindow(filePath);
     }
@@ -356,7 +372,10 @@ ipc.on("main-file-saved", (event, absFilePath) => {
     addRecentFile(absFilePath);
 
     var win = ProjectWindow.withWebContents(event.sender);
-    win.mainInkAbsPath = absFilePath;
+
+    // Keep this resolved, to match ProjectWindow.withMainkInkPath - otherwise
+    // a project saved under a new name can be opened a second time.
+    win.mainInkAbsPath = path.resolve(absFilePath);
     win.refreshProjectSettings(absFilePath);
 });
 

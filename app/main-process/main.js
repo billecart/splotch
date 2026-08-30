@@ -110,16 +110,11 @@ ipcMain.handle("try-close", async (event) =>{
     
 })
 
-app.on('will-finish-launching', function () {
-    app.on("open-file", function (event, path) {
-        ProjectWindow.open(path);
-        event.preventDefault();
-    });
-
-});
-
 let isQuitting = false;
 
+// Note: this must be the *only* "open-file" listener. Registering a second one
+// (e.g. inside will-finish-launching) makes every Finder double-click or dock
+// drop open the file twice.
 app.on("open-file", function (event, path) {
 
     // e.g. Drag and drop onto app to open it.
@@ -127,20 +122,14 @@ app.on("open-file", function (event, path) {
     if( !hasFinishedLaunch ) {
         pendingPathToOpen = path;
     }
-    
-    // Drag and drop onto app while it's already open
-    else {
 
-        // See if this root file is already open in an existing window
-        let existingWin = ProjectWindow.withMainkInkPath(path);
-        if( existingWin ) {
-            existingWin.browserWindow.focus();
-            existingWin.browserWindow.webContents.send('open-main-ink');
-        } else {
-            ProjectWindow.open(path);       
-        }
+    // Drag and drop onto app while it's already open.
+    // ProjectWindow.open focuses an existing window if this file is already
+    // open, rather than creating a duplicate.
+    else {
+        ProjectWindow.open(path);
     }
-    
+
     event.preventDefault();
 });
 
