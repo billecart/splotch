@@ -16,7 +16,10 @@ const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "splotch-test-"));
 
 // --- fake windows -------------------------------------------------------
 
-let createdWindows = [];
+// Every window ever created, the way Electron's BrowserWindow.getAllWindows()
+// sees them. `createdSinceReset` is the separate per-test counter.
+const allWindows = [];
+let createdSinceReset = 0;
 
 function FakeWebContents() {
     const webContents = new EventEmitter();
@@ -36,23 +39,27 @@ class FakeBrowserWindow extends EventEmitter {
         this.webContents = FakeWebContents();
         this.focusCount = 0;
         this.destroyed = false;
-        createdWindows.push(this);
+        allWindows.push(this);
+        createdSinceReset++;
     }
     loadURL() {}
     setSheetOffset() {}
     setRepresentedFilename(p) { this.representedFilename = p; }
     setTitle(t) { this.title = t; }
     focus() { this.focusCount++; }
+    isMinimized() { return this.minimized === true; }
+    minimize() { this.minimized = true; }
+    restore() { this.minimized = false; }
     show() {}
     close() {}
     destroy() { this.destroyed = true; }
     send(...args) { this.webContents.send(...args); }
     isDestroyed() { return this.destroyed; }
 }
-FakeBrowserWindow.getFocusedWindow = () => createdWindows[createdWindows.length - 1] || null;
-FakeBrowserWindow.getAllWindows = () => createdWindows.slice();
+FakeBrowserWindow.getFocusedWindow = () => allWindows[allWindows.length - 1] || null;
+FakeBrowserWindow.getAllWindows = () => allWindows.slice();
 FakeBrowserWindow.fromWebContents = wc =>
-    createdWindows.find(w => w.webContents === wc) || null;
+    allWindows.find(w => w.webContents === wc) || null;
 
 // --- fake app -----------------------------------------------------------
 
@@ -67,6 +74,14 @@ app.isReady = () => true;
 app.whenReady = () => Promise.resolve();
 app.setName = () => {};
 app.dock = { setMenu: () => {} };
+
+// Single instance lock. Granted by default; tests can revoke it.
+let singleInstanceLockAvailable = true;
+app.requestSingleInstanceLock = additionalData => {
+    app.singleInstanceLockData = additionalData;
+    return singleInstanceLockAvailable;
+};
+app.releaseSingleInstanceLock = () => {};
 
 // --- fake menu / dialog / ipc ------------------------------------------
 
@@ -116,11 +131,13 @@ module.exports = {
     electron: fakeElectron,
     app,
     userDataDir,
-    windowCount: () => createdWindows.length,
-    windows: () => createdWindows.slice(),
-    lastWindow: () => createdWindows[createdWindows.length - 1] || null,
-    resetWindowCount: () => { createdWindows = []; },
+    // Windows created since the last resetWindowCount().
+    windowCount: () => createdSinceReset,
+    windows: () => allWindows.slice(),
+    lastWindow: () => allWindows[allWindows.length - 1] || null,
+    resetWindowCount: () => { createdSinceReset = 0; },
     setOpenDialogResult: paths => { openDialogResult = paths; },
+    setSingleInstanceLockAvailable: available => { singleInstanceLockAvailable = available; },
 
     // An `open-file` event object that records preventDefault(), the way
     // Electron's does.

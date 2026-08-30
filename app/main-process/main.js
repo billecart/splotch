@@ -143,11 +143,49 @@ ipcMain.on("project-cancelled-close", (event) => {
     isQuitting = false;
 });
 
+// Windows/Linux pass the file to open as a command line argument. The path
+// isn't always argv[1] - a packaged app can be given flags first.
+function inkPathFromArgv(argv) {
+    if( !argv ) return null;
+
+    for(let i = 1; i < argv.length; i++) {
+        if( typeof argv[i] == "string" && argv[i].toLowerCase().endsWith(".ink") )
+            return argv[i];
+    }
+    return null;
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
-    
+
+    // Only one splotch at a time. Without this, a second copy of the app
+    // bundle (a build sitting next to the installed one, say) can be launched
+    // alongside the running app, and the same file ends up open in both.
+    // By now "open-file" has already given us pendingPathToOpen on macOS.
+    if( !app.requestSingleInstanceLock({ openPath: pendingPathToOpen }) ) {
+        app.quit();
+        return;
+    }
+
+    // A second launch hands us its file rather than opening its own window.
+    app.on('second-instance', (event, argv, workingDirectory, additionalData) => {
+        const pathToOpen = (additionalData && additionalData.openPath) || inkPathFromArgv(argv);
+        if( pathToOpen ) {
+            // Focuses an existing window if this file is already open.
+            ProjectWindow.open(pathToOpen);
+            return;
+        }
+
+        // No file, so just bring splotch forward.
+        const existingWindows = BrowserWindow.getAllWindows();
+        if( existingWindows.length > 0 ) {
+            if( existingWindows[0].isMinimized() ) existingWindows[0].restore();
+            existingWindows[0].focus();
+        }
+    });
+
     app.on('window-all-closed', function () {
         if (process.platform != 'darwin' || isQuitting) {
             app.quit();
@@ -304,14 +342,8 @@ app.on('ready', function () {
     });
 
     // Windows passed file to open on command line?
-    if (process.platform == "win32" && process.argv.length > 1 && !pendingPathToOpen) {
-        for (let i = 1; i < process.argv.length; i++) {
-            var arg = process.argv[i].toLowerCase();
-            if (arg.endsWith(".ink")) {
-                pendingPathToOpen = process.argv[1];
-                break;
-            }
-        }
+    if( process.platform == "win32" && !pendingPathToOpen ) {
+        pendingPathToOpen = inkPathFromArgv(process.argv);
     }
 
     // Opened splotch with specific file (e.g. drag and drop or windows command line)

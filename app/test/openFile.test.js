@@ -10,6 +10,10 @@ require("../main-process/main.js");
 
 const app = stub.app;
 
+function secondInstance(argv, additionalData) {
+    app.emit("second-instance", stub.makeEvent(), argv, process.cwd(), additionalData);
+}
+
 function openFile(filePath) {
     const event = stub.makeEvent();
     app.emit("open-file", event, filePath);
@@ -96,6 +100,54 @@ describe("opening a file", function() {
 
         assert.equal(stub.windowCount(), 0);
         assert.equal(win.browserWindow.focusCount, 1);
+    });
+
+    it("takes the single instance lock, so a second copy of the app defers", function() {
+        assert.ok(app.singleInstanceLockData !== undefined);
+        assert.equal(app.listenerCount("second-instance"), 1);
+    });
+
+    it("opens the file a second instance was launched with, in this instance", function() {
+        stub.resetWindowCount();
+
+        secondInstance(["splotch"], { openPath: "/tmp/splotch-test/from-second.ink" });
+
+        assert.equal(stub.windowCount(), 1);
+    });
+
+    it("does not duplicate a file a second instance was launched with", function() {
+        const filePath = "/tmp/splotch-test/second-dupe.ink";
+        openFile(filePath);
+        const win = ProjectWindow.withMainkInkPath(filePath);
+        stub.resetWindowCount();
+
+        secondInstance(["splotch"], { openPath: filePath });
+
+        assert.equal(stub.windowCount(), 0);
+        assert.equal(win.browserWindow.focusCount, 1);
+    });
+
+    it("finds the ink path in a command line that has flags before it", function() {
+        stub.resetWindowCount();
+
+        // Windows: the path is not necessarily argv[1].
+        secondInstance(["splotch.exe", "--some-flag", "/tmp/splotch-test/from-argv.ink"]);
+
+        assert.equal(stub.windowCount(), 1);
+        assert.ok(ProjectWindow.withMainkInkPath("/tmp/splotch-test/from-argv.ink"));
+    });
+
+    it("just focuses a window when a second instance brings no file", function() {
+        const firstWindow = stub.electron.BrowserWindow.getAllWindows()[0];
+        firstWindow.minimize();
+        const focusesBefore = firstWindow.focusCount;
+        stub.resetWindowCount();
+
+        secondInstance(["splotch"], {});
+
+        assert.equal(stub.windowCount(), 0);
+        assert.equal(firstWindow.focusCount, focusesBefore + 1);
+        assert.equal(firstWindow.isMinimized(), false);
     });
 
     it("still opens a window for a file that is not already open", function() {
