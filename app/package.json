@@ -1,7 +1,7 @@
 {
   "name": "splotch",
   "productName": "splotch",
-  "version": "0.16.2",
+  "version": "0.16.3",
   "description": "An editor for ink",
   "main": "main-process/main.js",
   "repository": {
