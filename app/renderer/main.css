@@ -552,7 +552,7 @@ img.issue-icon.warning {
 #editor .ace-todo,      /* issue from compiler */
 #editor span.ace_todo   /* syntax highlighter */
 {
-  background: #ccff00 !important;
+  background: #ffe933 !important;
   color: #000 !important;
 }
 

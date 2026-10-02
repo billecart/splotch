@@ -127,6 +127,15 @@ var inkHighlightRules = function() {
                 defaultToken: "comment.block.json"
             }]
         }, {
+            // "//TODO ..." highlights as a TODO from any state, not just
+            // `start` (nested states include #comments but not #TODO).
+            token: [
+                "todo",
+                "todo.TODO",
+                "todo"
+            ],
+            regex: /(\/\/\s*)(TODO\b)(.*$)/
+        }, {
             token: [
                 "punctuation.definition.comment.json",
                 "comment.line.double-slash.js"
